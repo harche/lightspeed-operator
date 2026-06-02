@@ -14,10 +14,10 @@ COPY lightspeed-operator/go.mod lightspeed-operator/go.sum ./
 
 USER 0
 
-# Point to the local agentic operator instead of the remote
 RUN go mod edit -replace github.com/openshift/lightspeed-agentic-operator=./lightspeed-agentic-operator \
     && go mod edit -replace github.com/openshift/lightspeed-agentic-operator/api=./lightspeed-agentic-operator/api
 
+ENV GOTOOLCHAIN=auto
 RUN go mod download
 
 # Copy the operator source
@@ -27,6 +27,8 @@ COPY lightspeed-operator/internal/ internal/
 COPY lightspeed-operator/LICENSE /licenses/
 
 USER 0
+
+RUN go mod tidy
 
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build -a -tags strictfipsruntime -o manager cmd/main.go
 
